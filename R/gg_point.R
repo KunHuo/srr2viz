@@ -24,6 +24,4 @@ gg_point <- function(data, x.var, y.var, x.breaks.n = 5, y.breaks.n = 5, ...){
     ggplot2::scale_x_continuous(expand = y.expand, breaks = x.breaks, limits = x.limits) +
     ggplot2::coord_cartesian(clip = "off") +
     ggplot2::theme_classic()
-
 }
-
