@@ -1,11 +1,14 @@
 Package: srr2viz
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Statistical Report in R for Visualisation
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Rongrui Huo
+Maintainer: Rongrui Huo <huorongrui@163.com>
+Description: Wrapper functions to make 'ggplot2' visualisation easier with less brainpower required for statistical report.
+License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 7.1.2
+Imports: 
+    ggplot2
+
