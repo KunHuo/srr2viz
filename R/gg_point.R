@@ -25,12 +25,15 @@ gg_point <- function(data, x, y, fact, alpha = 1, colour = "black", fill = "blac
   })
 
   cowplot::plot_grid(plotlist = plotlist, labels = "AUTO")
-
 }
 
 
 
-gg_point_core <- function(data, x, y, alpha = 1, colour = "black", fill = "black", shape = 16, size = 1.5, x.breaks = NULL, y.breaks = NULL,x.breaks.n = 5, y.breaks.n = 5, ...){
+gg_point_core <- function(data, x, y, alpha = 1, colour = "black", fill = "black", shape = 16, size = 1.5,
+                          x.breaks = NULL,
+                          y.breaks = NULL,
+                          x.breaks.n = 5,
+                          y.breaks.n = 5, ...){
 
   x.vec <- data[[x]]
   y.vec <- data[[y]]
