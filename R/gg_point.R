@@ -1,4 +1,11 @@
-gg_point <- function(data, x, y, fact, alpha = 1, colour = "black", fill = "black", shape = 16, size = 1.5, x.breaks.n = 5, y.breaks.n = 5, ...){
+gg_point <- function(data, x, y,
+                     x.breaks = NULL,
+                     y.breaks = NULL,
+                     x.breaks.n = 5,
+                     y.breaks.n = 5,
+                     fact, alpha = 1, colour = "black", fill = "black", shape = 16, size = 1.5,
+                     theme = theme_sci(),
+                     ...){
 
   x <- rlang::enquo(x)
   y <- rlang::enquo(y)
@@ -12,28 +19,36 @@ gg_point <- function(data, x, y, fact, alpha = 1, colour = "black", fill = "blac
                fill = fill,
                hape = shape,
                size = size,
+               x.breaks = x.breaks,
+               y.breaks = y.breaks,
                x.breaks.n = x.breaks.n,
                y.breaks.n = y.breaks.n,
+               theme = theme,
                ... = ...)
+  opts$data <- data
+  do.call(gg_point_core, args = opts)
 
-  plotlist <- by.data.frame(data = data, INDICES =  data[[fact]], function(d){
-    opts$data <- NULL
-    opts$data <- d
-    # opts$x.breaks <- seq(4, 8, 1)
-    # opts$y.breaks <- seq(2, 5, 1)
-    do.call(gg_point_core, args = opts)
-  })
-
-  cowplot::plot_grid(plotlist = plotlist, labels = "AUTO")
+  # plotlist <- by.data.frame(data = data, INDICES =  data[[fact]], function(d){
+  #   opts$data <- NULL
+  #   opts$data <- d
+  #   # opts$x.breaks <- seq(4, 8, 1)
+  #   # opts$y.breaks <- seq(2, 5, 1)
+  #   do.call(gg_point_core, args = opts)
+  # })
+  #
+  # cowplot::plot_grid(plotlist = plotlist, labels = "AUTO")
 }
 
 
 
-gg_point_core <- function(data, x, y, alpha = 1, colour = "black", fill = "black", shape = 16, size = 1.5,
+gg_point_core <- function(data, x, y,
                           x.breaks = NULL,
                           y.breaks = NULL,
                           x.breaks.n = 5,
-                          y.breaks.n = 5, ...){
+                          y.breaks.n = 5,
+                          alpha = 1, colour = "black", fill = "black", shape = 16, size = 1.5,
+                          theme = theme_sci(),
+                          ...){
 
   x.vec <- data[[x]]
   y.vec <- data[[y]]
@@ -57,16 +72,17 @@ gg_point_core <- function(data, x, y, alpha = 1, colour = "black", fill = "black
   index <- sapply(opts, function(x){ as.character(x) %in% names(data)})
   aes.opt <- names(opts)[index]
   aes.str <- paste(sprintf("%s = .data[[%s]]", aes.opt, aes.opt), collapse = ", ")
-  aes.str <- sprintf("ggplot2::aes(%s)", aes.str)
+  aes.str <- sprintf("aes(%s)", aes.str)
   aes <- eval(parse(text = aes.str))
 
   opts <- opts[!index]
   opts$mapping <- aes
   geom <- do.call("geom_point", args = opts)
 
-  ggplot2::ggplot(data, ggplot2::aes(x = .data[[x]], y = .data[[y]])) +
+  ggplot(data, aes(x = .data[[x]], y = .data[[y]])) +
     geom +
-    ggplot2::scale_y_continuous(expand = x.expand, breaks = y.breaks, limits = y.limits) +
-    ggplot2::scale_x_continuous(expand = y.expand, breaks = x.breaks, limits = x.limits) +
-    ggplot2::coord_cartesian(clip = "off")
+    scale_y_continuous(expand = x.expand, breaks = y.breaks, limits = y.limits) +
+    scale_x_continuous(expand = y.expand, breaks = x.breaks, limits = x.limits) +
+    coord_cartesian(clip = "off") +
+    theme
 }
