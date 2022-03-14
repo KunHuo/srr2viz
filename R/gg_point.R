@@ -3,7 +3,8 @@ gg_point <- function(data, x, y,
                      y.breaks = NULL,
                      x.breaks.n = 5,
                      y.breaks.n = 5,
-                     fact, alpha = 1, colour = "black", fill = "black", shape = 16, size = 1.5,
+                     fact, alpha = 1, colour = "black", fill = "black", shape = 19, size = 1.5,
+                     palette = NULL,
                      theme = theme_sci(),
                      ...){
 
@@ -23,6 +24,7 @@ gg_point <- function(data, x, y,
                y.breaks = y.breaks,
                x.breaks.n = x.breaks.n,
                y.breaks.n = y.breaks.n,
+               palette = palette,
                theme = theme,
                ... = ...)
   opts$data <- data
@@ -48,6 +50,7 @@ gg_point_core <- function(data, x, y,
                           y.breaks.n = 5,
                           alpha = 1, colour = "black", fill = "black", shape = 16, size = 1.5,
                           theme = theme_sci(),
+                          palette = NULL,
                           ...){
 
   x.vec <- data[[x]]
@@ -79,10 +82,45 @@ gg_point_core <- function(data, x, y,
   opts$mapping <- aes
   geom <- do.call("geom_point", args = opts)
 
-  ggplot(data, aes(x = .data[[x]], y = .data[[y]])) +
+ p <- ggplot(data, aes(x = .data[[x]], y = .data[[y]])) +
     geom +
     scale_y_continuous(expand = x.expand, breaks = y.breaks, limits = y.limits) +
     scale_x_continuous(expand = y.expand, breaks = x.breaks, limits = x.limits) +
     coord_cartesian(clip = "off") +
     theme
+
+ if((colour %in% names(data)) | (fill %in% names(data))){
+   if(!is.null(palette)){
+     p <- p + ggplot2::scale_colour_manual(values = palette) +
+       ggplot2::scale_fill_manual(values = palette)
+   }
+ }
+
+ p
 }
+
+
+stat_cor <- function(x, y, method = "pearson",
+                     digits.p.value = 3,
+                     digits.r = 2,
+                     alternative = c("two.sided", "less", "greater"),
+                     conf.level = 0.95,
+                     conf.int = FALSE){
+
+  test <- cor.test(x, y, method = method, alternative = alternative, conf.level = conf.level)
+  r  <- test$estimate[[1]]
+  p  <- test$p.value
+  ci <- test$conf.int
+
+
+  if(conf.int){
+    sprintf("italic(r) == %.2f (95%% CI: %.2f - %.2f), italic(P) == %.2f", r, ci[1], ci[2], p)
+  }else{
+    sprintf("italic(r)~`=`~%.2f*`,`~italic(P)~`=`~%.3f", r, p)
+  }
+
+}
+
+
+
+
