@@ -106,12 +106,10 @@ stat_cor <- function(x, y, method = "pearson",
                      alternative = c("two.sided", "less", "greater"),
                      conf.level = 0.95,
                      conf.int = FALSE){
-
   test <- cor.test(x, y, method = method, alternative = alternative, conf.level = conf.level)
   r  <- test$estimate[[1]]
   p  <- test$p.value
   ci <- test$conf.int
-
 
   if(conf.int){
     sprintf("italic(r) == %.2f (95%% CI: %.2f - %.2f), italic(P) == %.2f", r, ci[1], ci[2], p)
