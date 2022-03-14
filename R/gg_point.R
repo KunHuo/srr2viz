@@ -118,7 +118,6 @@ stat_cor <- function(x, y, method = "pearson",
   }else{
     sprintf("italic(r)~`=`~%.2f*`,`~italic(P)~`=`~%.3f", r, p)
   }
-
 }
 
 
