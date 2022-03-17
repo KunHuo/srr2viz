@@ -1,0 +1,162 @@
+#' ggplo2 theme for SCI
+#'
+#' @param font.size font size, default 12,
+#' @param font.family font family, detault Times New Roman.
+#' @param line.size line size, default 0.25.
+#' @param legend.key.size legend key size, dsfault 0.8.
+#' @param face.bold a logical, whether bold the title of axis, plot, strip, and legend, default FALSE.
+#' @param panel.border a logical, whether plot panel border, default FALSE.
+#' @param aspect.ratio the ratio of the width to the height, default NULL.
+#' @param ... further arguments pass to the [ggplot2::theme] function.
+#' @param panel.grid.major panel grid major.
+#' @param panel.grid.minor panel grid minor.
+#' @param panel.spacing panel spacing.
+#' @param strip.background strip background.
+#'
+#' @export
+theme_sci <- function(font.size = 12,
+                      font.family = "serif",
+                      line.size = 0.5,
+                      legend.key.size = 0.8,
+                      face.bold = FALSE,
+                      panel.grid.major = FALSE,
+                      panel.grid.minor = FALSE,
+                      panel.border = FALSE,
+                      panel.spacing = 0.6,
+                      strip.background = "gray90",
+                      aspect.ratio = NULL, ...) {
+
+  face <- ifelse(face.bold, "bold", "plain")
+
+  if(panel.grid.major){
+    pg.major = ggplot2::element_line(color = "gray90", size = line.size)
+  }else{
+    pg.major = ggplot2::element_blank()
+  }
+
+  if(panel.grid.minor){
+    pg.minor = ggplot2::element_line(color = "gray90", size = line.size, linetype = "dashed")
+  }else{
+    pg.minor = ggplot2::element_blank()
+  }
+
+
+  if(panel.border){
+    pborder = ggplot2::element_rect(color = "black", size = line.size)
+  }else{
+    pborder = ggplot2::element_rect(color = "NA")
+  }
+
+  ggplot2::theme_bw(
+    base_size = font.size,
+    base_family = font.family,
+    base_line_size = line.size,
+    base_rect_size = line.size) +
+
+    ggplot2::theme(
+      panel.background = ggplot2::element_rect(fill = NA),
+      panel.grid = ggplot2::element_blank(),
+      panel.border = pborder,
+      panel.grid.major = pg.major,
+      panel.grid.minor = pg.minor,
+      panel.spacing = ggplot2::unit(panel.spacing, "cm"),
+
+      strip.background = ggplot2::element_rect(fill = strip.background, size = line.size),
+
+      axis.line = ggplot2::element_line(size = line.size, color = "black",lineend = "square"),
+      axis.ticks.length = ggplot2::unit(0.15, "cm"),
+      axis.ticks = ggplot2::element_line(color = "black", size = line.size),
+      axis.text = ggplot2::element_text(color = "black", size = font.size),
+      axis.title = ggplot2::element_text(color = "black", size = font.size, face = face),
+
+      legend.background = ggplot2::element_rect(fill = "NA"),
+      legend.text = ggplot2::element_text(color = "black", size = font.size),
+      legend.title = ggplot2::element_text(face = face),
+      legend.key.size = ggplot2::unit(legend.key.size, "lines"),
+
+      plot.title = ggplot2::element_text(size = font.size + 2, face = face),
+      plot.title.position = "plot",
+      plot.margin = ggplot2::unit(c(0.30, 0.45, 0.25, 0.30), "cm"), # top, right, bottom, left
+
+      strip.text = ggplot2::element_text(color = "black", size = font.size, face = face),
+      aspect.ratio = aspect.ratio,
+      complete = FALSE,
+      ...
+    )
+}
+
+
+is_waiver <- function(value){
+  class(value) == "waiver"
+}
+
+
+legend_title <- function(value = NULL){
+  if(is.null(value)){
+    ggplot2::theme(
+      legend.title = ggplot2::element_blank()
+    )
+  }else{
+    ggplot2::labs(color = value, fill = value, alpha = value, size = value, linetype = value)
+  }
+}
+
+
+legend_position <- function(position) {
+  if(is.character(position)){
+    ggplot2::theme(
+      legend.position = position
+    )
+  }else{
+    ggplot2::theme(
+      legend.position = position,
+      legend.justification = position
+    )
+  }
+}
+
+
+rotate_x_text <- function (angle = 45, hjust = NULL, vjust = NULL, ...) {
+  if (missing(hjust) & angle > 5)
+    hjust <- 1
+  if (missing(vjust) & angle == 90)
+    vjust <- 0.5
+  ggplot2::theme(axis.text.x = element_text(angle = angle, hjust = hjust, vjust = vjust, ...))
+}
+
+
+rotate_y_text <- function (angle = 45, hjust = NULL, vjust = NULL, ...) {
+  if (missing(hjust) & angle == 90)
+    hjust <- 0.5
+  else if (missing(hjust) & angle > 5)
+    hjust <- 1
+  ggplot2::theme(axis.text.y = element_text(angle = angle, hjust = hjust, vjust = vjust, ...))
+}
+
+
+pretty_xbreaks <- function(plot, x.breaks = NULL, x.breaks.n = 5, zero = FALSE){
+  if(is.null(x.breaks)){
+    gdata <- ggplot_build(plot)$data[[1]]
+    x.breaks <- gdata[["x"]]
+    if(zero){
+      x.breaks <- c(0, x.breaks)
+    }
+    x.breaks <- pretty(x.breaks, x.breaks.n)
+  }
+  x.breaks
+}
+
+
+pretty_ybreaks <- function(plot, y.breaks = NULL, y.breaks.n = 5, zero = FALSE){
+  if(is.null(y.breaks)){
+    gdata <- ggplot_build(plot)$data[[1]]
+    y.breaks <- gdata[["y"]]
+
+    if(zero){
+      y.breaks <- c(0, y.breaks)
+    }
+
+    y.breaks <- pretty(y.breaks, y.breaks.n)
+  }
+  y.breaks
+}
