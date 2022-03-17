@@ -1,16 +1,48 @@
 
-gg_arrange <- function(..., plotlist = NULL, ncol = NULL, nrow = NULL,
-                      labels = NULL, label.x = 0, label.y = 1, hjust = -1.0, vjust = 2.0,
-                      font.label = list(size = 14, color = "black", face = "plain", family = "serif"),
+gg_arrange <- function(..., plotlist = NULL,
+                      ncol = NULL,
+                      nrow = NULL,
+                      tag.levels = NULL,
+                      tag.bold = FALSE,
+                      tag.size = NULL,
                       align = c("none", "h", "v", "hv"),
                       widths = 1, heights = 1,
-                      legend.position = "right", legend.collect = FALSE, legend.grob = NULL ){
+                      plot.margin = NULL,
+                      legend.position = "right", legend.collect = FALSE, legend.grob = NULL){
 
   plots <- c(list(...), plotlist)
 
-  plots <- Map(function(p, tag){
-    p + ggplot2::ggtitle("")
-  }, plots, LETTERS[1:length(plots)])
+
+  if(!is.null(tag.levels)){
+    tags <- .tag_levels(tags = tag.levels, n = length(plots))
+    plots <- Map(function(p, tag){
+      p + ggplot2::ggtitle(tag)
+    }, plots, tags)
+  }
+
+  if(tag.bold){
+    plots <- lapply(plots, function(p){
+       p + ggplot2::theme(
+         plot.title = ggplot2::element_text(face = "bold")
+       )
+    })
+  }
+
+  if(!is.null(plot.margin)){
+    plots <- lapply(plots, function(p){
+      p + ggplot2::theme(
+        plot.margin = ggplot2::unit(plot.margin, "cm"), # top, right, bottom, left
+      )
+    })
+  }
+
+  if(!is.null(tag.size)){
+    plots <- lapply(plots, function(p){
+      p + ggplot2::theme(
+        plot.title = ggplot2::element_text(size = tag.size)
+      )
+    })
+  }
 
 
   align <- match.arg(align)
@@ -41,24 +73,26 @@ gg_arrange <- function(..., plotlist = NULL, ncol = NULL, nrow = NULL,
   }
 
   # Split plots over multiple pages
-  if(nb.plots > nb.plots.per.page){
-    plots <- split(plots, ceiling(seq_along(plots)/nb.plots.per.page))
-  }
-  # One unique page
-  else plots <- list(plots)
+  # if(nb.plots > nb.plots.per.page){
+  #   plots <- split(plots, ceiling(seq_along(plots)/nb.plots.per.page))
+  # }
+  # # One unique page
+  # else plots <- list(plots)
 
-  # label arguments
-  .lab <- .update_label_pms(font.label, label.x = label.x, label.y = label.y,
-                            hjust = hjust, vjust = vjust)
+  plots <- list(plots)
 
-  res <- lapply(plots, .plot_grid,
-                    ncol = ncol, nrow = nrow, labels = labels,
-                    label_size = .lab$size, label_fontfamily = .lab$family,
-                    label_fontface = .lab$face, label_colour = .lab$color,
-                    label_x = .lab$label.x, label_y = .lab$label.y,
-                    hjust = .lab$hjust, vjust = .lab$vjust, align = align,
-                    rel_widths = widths, rel_heights = heights,
-                    legend = legend.position, common.legend.grob = legend.grob)
+
+  res <- lapply(
+    plots,
+    .plot_grid,
+    ncol = ncol,
+    nrow = nrow,
+    align = align,
+    rel_widths = widths,
+    rel_heights = heights,
+    legend = legend.position,
+    common.legend.grob = legend.grob
+  )
 
   if(length(res) == 1) res <- res[[1]]
 
@@ -191,4 +225,38 @@ get_legend <- function(p, position = NULL){
 
 .is_list <- function(x){
   inherits(x, "list")
+}
+
+.tag_levels <- function(tags, n){
+
+  if(is.null(tags)){
+    return(NULL)
+  }
+
+  if(length(tags) == 1L){
+    if(tags[1] == "A"){
+      tag.levels <- LETTERS[1:n]
+    }else if(tags[1] == "a"){
+      tag.levels <- letters[1:n]
+    }else if(tags == "(A)"){
+      tag.levels <- sprintf("(%s)", LETTERS[1:n])
+    }else if(tags == "(a)"){
+      tag.levels <- sprintf("(%s)", letters[1:n])
+    }else if(tags == "[A]"){
+      tag.levels <- sprintf("[%s]", LETTERS[1:n])
+    }else if(tags == "[a]"){
+      tag.levels <- sprintf("[%s]", letters[1:n])
+    }else if(tags == "(1)"){
+      tag.levels <- sprintf("(%s)", 1:n)
+    }else if(tags == "[1]"){
+      tag.levels <- sprintf("[%s]", 1:n)
+    }else{
+      tag.levels <- LETTERS[1:n]
+    }
+  }else{
+    if(length(tags) != n){
+      stop("The number of tags should match the number of figures")
+    }
+    tags
+  }
 }

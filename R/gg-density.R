@@ -1,20 +1,3 @@
-
-add_line <- function(data, x, group, plot){
-  means <- tapply(data[[x]], INDEX = data[[group]], FUN = mean, na.rm = TRUE)
-  means <- data.frame(group = names(means), linetype = "mean", value = means)
-
-  medians <- tapply(data[[x]], INDEX = data[[group]], FUN = median, na.rm = TRUE)
-  medians <- data.frame(group = names(medians), linetype = "median", value = medians)
-
-  stats <- rbind(means, medians)
-
-  plot +
-    geom_vline(aes(xintercept = .data[["value"]], color = group, linetype = linetype), data = stats)
-}
-
-
-
-
 gg_density <- function(data,
                        x,
                        y = "density",
@@ -68,6 +51,20 @@ gg_density <- function(data,
   }
 
   p
+}
+
+
+add_line <- function(data, x, group, plot){
+  means <- tapply(data[[x]], INDEX = data[[group]], FUN = mean, na.rm = TRUE)
+  means <- data.frame(group = names(means), linetype = "mean", value = means)
+
+  medians <- tapply(data[[x]], INDEX = data[[group]], FUN = median, na.rm = TRUE)
+  medians <- data.frame(group = names(medians), linetype = "median", value = medians)
+
+  stats <- rbind(means, medians)
+
+  plot +
+    geom_vline(aes(xintercept = .data[["value"]], color = group, linetype = linetype), data = stats)
 }
 
 

@@ -76,7 +76,7 @@ theme_sci <- function(font.size = 12,
 
       plot.title = ggplot2::element_text(size = font.size + 2, face = face),
       plot.title.position = "plot",
-      plot.margin = ggplot2::unit(c(0.30, 0.45, 0.25, 0.30), "cm"), # top, right, bottom, left
+      plot.margin = ggplot2::unit(c(0.6, 1.2, 0.4, 0.8), "cm"), # top, right, bottom, left
 
       strip.text = ggplot2::element_text(color = "black", size = font.size, face = face),
       aspect.ratio = aspect.ratio,
