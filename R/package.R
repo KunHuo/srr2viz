@@ -3,5 +3,4 @@
 #' scale_colour_manual scale_fill_manual
 #' coord_cartesian ggplot aes
 #' geom_point
-#' @importFrom rlang .data
 NULL
