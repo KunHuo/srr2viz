@@ -1,4 +1,36 @@
-
+#' Arrange Multiple ggplots
+#'
+#' Arrange multiple ggplots on the same page. Wrapper around plot_grid().
+#' Can also create a common unique legend for multiple plots.
+#'
+#' @param ... List of plots to be arranged into the grid.
+#' @param plotlist (optional) list of plots to display.
+#' @param ncol (optional) number of columns in the plot grid.
+#' @param nrow (optional) number of rows in the plot grid.
+#' @param tag.levels (optional) list of labels to be added to the plots. You
+#' can also set "A", "a", "1", "[A]", "[a]", "[1]", "(A)", "(a)"or "(1)" to
+#' auto-generate tag sequence. In addition, you can also directly assign values
+#' through the character vector.
+#' @param tag.bold logical value, whether to make tags bold.
+#' @param tag.size tags size.
+#' @param align (optional) Specifies whether graphs in the grid should be
+#' horizontally ("h") or vertically ("v") aligned. Options are "none" (default),
+#' "hv" (align in both directions), "h", and "v".
+#' @param widths (optional) numerical vector of relative columns widths. For example,
+#' in a two-column grid, widths = c(2, 1) would make the first column twice as
+#' wide as the second column.
+#' @param heights same as widths but for column heights.
+#' @param plot.margin margin around entire plot (vector with the sizes of the top,
+#' right, bottom, and left margins).
+#' @param legend.position the position of legends ("none", "left", "right",
+#' "bottom", "top", or two-element numeric vector)
+#' @param legend.collect logical value. Default is FALSE. If TRUE, a common
+#' unique legend will be created for arranged plots.
+#' @param legend.grob a legend grob as returned by the function get_legend().
+#' If provided, it will be used as the common legend.
+#'
+#' @return return an object of class ggarrange, which is a ggplot or a list of ggplot.
+#' @export
 gg_arrange <- function(..., plotlist = NULL,
                       ncol = NULL,
                       nrow = NULL,
@@ -50,7 +82,6 @@ gg_arrange <- function(..., plotlist = NULL,
   page.layout <- .get_layout(ncol, nrow, nb.plots)
   ncol <- page.layout$ncol
   nrow <- page.layout$nrow
-  nb.plots.per.page <- .nbplots_per_page(ncol, nrow)
 
   if(!is.null(legend.grob))
     legend.collect <- TRUE
@@ -72,12 +103,6 @@ gg_arrange <- function(..., plotlist = NULL,
     )
   }
 
-  # Split plots over multiple pages
-  # if(nb.plots > nb.plots.per.page){
-  #   plots <- split(plots, ceiling(seq_along(plots)/nb.plots.per.page))
-  # }
-  # # One unique page
-  # else plots <- list(plots)
 
   plots <- list(plots)
 
@@ -114,19 +139,6 @@ gg_arrange <- function(..., plotlist = NULL,
 }
 
 
-# Compute number of plots per page
-.nbplots_per_page <- function(ncol = NULL, nrow = NULL){
-
-  if(!is.null(ncol) & !is.null(nrow))
-    ncol * nrow
-  else if(!is.null(ncol))
-    ncol
-  else if(!is.null(nrow))
-    nrow
-  else Inf
-}
-
-
 .plot_grid <- function(plotlist, legend = "top", common.legend.grob = NULL,  ... ){
   res <- cowplot::plot_grid(plotlist = plotlist, ...)
   if(is.null(common.legend.grob)) return(res)
@@ -155,25 +167,6 @@ gg_arrange <- function(..., plotlist = NULL,
   p
 }
 
-
-# update label parameters for cowplot::plot_grid()
-.update_label_pms <- function(font.label,
-                              label.x = 0, label.y = 1, hjust = -0.5, vjust = 1.5){
-
-  .font <- list(size = 14, color = "black", face = "bold", family = NULL)
-  new.font.names <- names(font.label)
-  for(i in new.font.names) .font[[i]] <- font.label[[i]]
-
-  pms <- .font
-  list(
-    size = pms$size,
-    family = pms$family,
-    face = pms$face,
-    color = pms$color,
-    label.x = label.x, label.y = label.y,
-    hjust = hjust, vjust = vjust
-  )
-}
 
 .check_legend <- function(legend){
 
