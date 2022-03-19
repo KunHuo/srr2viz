@@ -16,8 +16,8 @@ gg_arrange(
   widths = 1,
   heights = 1,
   plot.margin = NULL,
-  legend.position = "right",
-  legend.collect = FALSE,
+  collect.legend = FALSE,
+  collect.position = "right",
   legend.grob = NULL
 )
 }
@@ -52,11 +52,11 @@ wide as the second column.}
 \item{plot.margin}{margin around entire plot (vector with the sizes of the top,
 right, bottom, and left margins).}
 
-\item{legend.position}{the position of legends ("none", "left", "right",
-"bottom", "top", or two-element numeric vector)}
-
-\item{legend.collect}{logical value. Default is FALSE. If TRUE, a common
+\item{collect.legend}{logical value. Default is FALSE. If TRUE, a common
 unique legend will be created for arranged plots.}
+
+\item{collect.position}{the position of legends ("none", "left", "right",
+"bottom", "top", or two-element numeric vector)}
 
 \item{legend.grob}{a legend grob as returned by the function get_legend().
 If provided, it will be used as the common legend.}
