@@ -22,16 +22,17 @@
 #' @param heights same as widths but for column heights.
 #' @param plot.margin margin around entire plot (vector with the sizes of the top,
 #' right, bottom, and left margins).
-#' @param legend.position the position of legends ("none", "left", "right",
+#' @param collect.position the position of legends ("none", "left", "right",
 #' "bottom", "top", or two-element numeric vector)
-#' @param legend.collect logical value. Default is FALSE. If TRUE, a common
+#' @param collect.legend logical value. Default is FALSE. If TRUE, a common
 #' unique legend will be created for arranged plots.
 #' @param legend.grob a legend grob as returned by the function get_legend().
 #' If provided, it will be used as the common legend.
 #'
 #' @return return an object of class ggarrange, which is a ggplot or a list of ggplot.
 #' @export
-gg_arrange <- function(..., plotlist = NULL,
+gg_arrange <- function(...,
+                      plotlist = NULL,
                       ncol = NULL,
                       nrow = NULL,
                       tag.levels = NULL,
@@ -40,10 +41,11 @@ gg_arrange <- function(..., plotlist = NULL,
                       align = c("none", "h", "v", "hv"),
                       widths = 1, heights = 1,
                       plot.margin = NULL,
-                      legend.position = "right", legend.collect = FALSE, legend.grob = NULL){
+                      collect.legend = FALSE,
+                      collect.position = "right",
+                      legend.grob = NULL){
 
   plots <- c(list(...), plotlist)
-
 
   if(!is.null(tag.levels)){
     tags <- .tag_levels(tags = tag.levels, n = length(plots))
@@ -76,7 +78,6 @@ gg_arrange <- function(..., plotlist = NULL,
     })
   }
 
-
   align <- match.arg(align)
   nb.plots <- length(plots)
   page.layout <- .get_layout(ncol, nrow, nb.plots)
@@ -84,17 +85,33 @@ gg_arrange <- function(..., plotlist = NULL,
   nrow <- page.layout$nrow
 
   if(!is.null(legend.grob))
-    legend.collect <- TRUE
-  if(is.null(legend.position) & legend.collect)
-    legend.position <- "top"
-  legend.position <- .check_legend(legend.position)
-  if(!is.null(legend.position))
+    collect.legend <- TRUE
+
+  if(is.null(collect.position) & collect.legend)
+    collect.position <- "top"
+
+
+  collect.position <- .check_legend(collect.position)
+
+
+  if(!is.null(collect.position))
     plots <- lapply(
       plots,
-      function(x) {if(!is.null(x)) x + theme(legend.position = legend.position) else x}
+      function(x) {
+        if(!is.null(x)){
+          x
+          # if(is.null(get_legend(x))){
+          #   x
+          # }else{
+          #   x + theme(legend.position = collect.position)
+          # }
+        }
+
+        else x
+      }
     )
 
-  if(legend.collect){
+  if(collect.legend){
     if(is.null(legend.grob))
       legend.grob <- get_legend(plots)
     plots <- lapply(
@@ -103,9 +120,7 @@ gg_arrange <- function(..., plotlist = NULL,
     )
   }
 
-
   plots <- list(plots)
-
 
   res <- lapply(
     plots,
@@ -115,7 +130,7 @@ gg_arrange <- function(..., plotlist = NULL,
     align = align,
     rel_widths = widths,
     rel_heights = heights,
-    legend = legend.position,
+    legend = collect.position,
     common.legend.grob = legend.grob
   )
 
@@ -184,6 +199,19 @@ gg_arrange <- function(..., plotlist = NULL,
       stop("Argument legend should be one of ", .collapse(allowed.values, sep = ", "))
   }
   return (legend)
+}
+
+.collapse <- function(x, y = NULL, sep = "."){
+  if(missing(y))
+    paste(x, collapse = sep)
+  else if(is.null(x) & is.null(y))
+    return(NULL)
+  else if(is.null(x))
+    return (as.character(y))
+  else if(is.null(y))
+    return(as.character(x))
+  else
+    paste0(x, sep, y)
 }
 
 get_legend <- function(p, position = NULL){

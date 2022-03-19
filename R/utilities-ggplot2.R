@@ -86,13 +86,19 @@ theme_sci <- function(font.size = 12,
 }
 
 
-is_waiver <- function(value){
+.is_waiver <- function(value){
   class(value) == "waiver"
 }
 
 
+#' Legend title
+#'
+#' @param value title
+#'
+#' @return a ggplot.
+#' @export
 legend_title <- function(value = NULL){
-  if(is.null(value)){
+  if(length(value) == 0L){
     ggplot2::theme(
       legend.title = ggplot2::element_blank()
     )
@@ -103,15 +109,21 @@ legend_title <- function(value = NULL){
 
 
 legend_position <- function(position) {
-  if(is.character(position)){
+  if(length(position) == 0L){
     ggplot2::theme(
-      legend.position = position
+      legend.position = "none"
     )
   }else{
-    ggplot2::theme(
-      legend.position = position,
-      legend.justification = position
-    )
+    if(is.character(position)){
+      ggplot2::theme(
+        legend.position = position
+      )
+    }else{
+      ggplot2::theme(
+        legend.position = position,
+        legend.justification = position
+      )
+    }
   }
 }
 
@@ -134,7 +146,7 @@ rotate_y_text <- function (angle = 45, hjust = NULL, vjust = NULL, ...) {
 }
 
 
-pretty_xbreaks <- function(plot, x.breaks = NULL, x.breaks.n = 5, zero = FALSE){
+.pretty_xbreaks <- function(plot, x.breaks = NULL, x.breaks.n = 5, zero = FALSE){
   if(is.null(x.breaks)){
     gdata <- ggplot_build(plot)$data[[1]]
     x.breaks <- gdata[["x"]]
@@ -147,7 +159,7 @@ pretty_xbreaks <- function(plot, x.breaks = NULL, x.breaks.n = 5, zero = FALSE){
 }
 
 
-pretty_ybreaks <- function(plot, y.breaks = NULL, y.breaks.n = 5, zero = FALSE){
+.pretty_ybreaks <- function(plot, y.breaks = NULL, y.breaks.n = 5, zero = FALSE){
   if(is.null(y.breaks)){
     gdata <- ggplot_build(plot)$data[[1]]
     y.breaks <- gdata[["y"]]
@@ -159,4 +171,27 @@ pretty_ybreaks <- function(plot, y.breaks = NULL, y.breaks.n = 5, zero = FALSE){
     y.breaks <- pretty(y.breaks, y.breaks.n)
   }
   y.breaks
+}
+
+
+.set_legend_title <- function(plot, title, data, group){
+  if(.is_waiver(title)){
+    label <- attr(data[[group]], "label")
+    if(is.null(label)){
+      plot
+    }else{
+      plot + legend_title(label)
+    }
+  }else{
+    plot + legend_title(title)
+  }
+}
+
+
+.set_legend_position <- function(plot, position){
+  if(.is_waiver(position)){
+    plot + legend_position("right")
+  }else{
+    plot + legend_position(position)
+  }
 }
