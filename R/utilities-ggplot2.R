@@ -16,7 +16,7 @@
 #' @export
 theme_sci <- function(font.size = 12,
                       font.family = "serif",
-                      line.size = 0.5,
+                      line.size = 0.25,
                       legend.key.size = 0.8,
                       face.bold = FALSE,
                       panel.grid.major = FALSE,
@@ -64,7 +64,7 @@ theme_sci <- function(font.size = 12,
       strip.background = ggplot2::element_rect(fill = strip.background, size = line.size),
 
       axis.line = ggplot2::element_line(size = line.size, color = "black",lineend = "square"),
-      axis.ticks.length = ggplot2::unit(0.15, "cm"),
+      axis.ticks.length = ggplot2::unit(0.12, "cm"),
       axis.ticks = ggplot2::element_line(color = "black", size = line.size),
       axis.text = ggplot2::element_text(color = "black", size = font.size),
       axis.title = ggplot2::element_text(color = "black", size = font.size, face = face),
@@ -146,8 +146,11 @@ rotate_y_text <- function (angle = 45, hjust = NULL, vjust = NULL, ...) {
 }
 
 
-.pretty_xbreaks <- function(plot, x.breaks = NULL, x.breaks.n = 5, zero = FALSE){
+.pretty_xbreaks <- function(plot, x.breaks = NULL, x.breaks.n = 5, zero = FALSE, facet = NULL){
   if(is.null(x.breaks)){
+    if(!is.null(facet)){
+      plot <- plot + ggplot2::facet_wrap(facet)
+    }
     gdata <- ggplot_build(plot)$data[[1]]
     x.breaks <- gdata[["x"]]
     if(zero){
@@ -159,8 +162,11 @@ rotate_y_text <- function (angle = 45, hjust = NULL, vjust = NULL, ...) {
 }
 
 
-.pretty_ybreaks <- function(plot, y.breaks = NULL, y.breaks.n = 5, zero = FALSE){
+.pretty_ybreaks <- function(plot, y.breaks = NULL, y.breaks.n = 5, zero = FALSE, facet = NULL){
   if(is.null(y.breaks)){
+    if(!is.null(facet)){
+      plot <- plot + ggplot2::facet_wrap(facet)
+    }
     gdata <- ggplot_build(plot)$data[[1]]
     y.breaks <- gdata[["y"]]
 
@@ -193,5 +199,24 @@ rotate_y_text <- function (angle = 45, hjust = NULL, vjust = NULL, ...) {
     plot + legend_position("right")
   }else{
     plot + legend_position(position)
+  }
+}
+
+
+.set_axis_title <- function(plot, x.title, y.title, data, x, y){
+  if(.is_waiver(x.title)){
+    if(!is.null(attr(data[[x]], "label"))){
+      plot <- plot + ggplot2::xlab(attr(data[[x]]), "label")
+    }
+  }else{
+    plot <- plot + ggplot2::xlab(x.title)
+  }
+
+  if(.is_waiver(y.title)){
+    if(!is.null(attr(data[[y]], "label"))){
+      plot <- plot + ggplot2::ylab(attr(data[[y]]), "label")
+    }
+  }else{
+    plot <- plot + ggplot2::ylab(y.title)
   }
 }

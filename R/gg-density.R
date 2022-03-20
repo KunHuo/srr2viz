@@ -5,11 +5,62 @@ gg_density <- function(data,
                        facet = NULL,
                        x.breaks = NULL,
                        y.breaks = NULL,
+                       x.title = waiver(),
+                       y.title = waiver(),
                        legend.title = waiver(),
                        legend.label = waiver(),
                        legend.position = waiver(),
-                       add.mean.line = FALSE,
-                       add.median.line = FALSE,
+                       add = c("mean", "median", "none"),
+                       palate = NULL,
+                       theme = theme_sci(), ...){
+
+  args <- list( data = data,
+                x = x,
+                y = y,
+                group = group,
+                x.breaks = x.breaks,
+                y.breaks = y.breaks,
+                x.title = x.title,
+                y.title = y.title,
+                legend.title = legend.title,
+                legend.label = legend.label,
+                legend.position = legend.position,
+                add = add,
+                palate = palate,
+                theme = theme,
+                ... = ...)
+
+  if(is.null(facet)){
+    do.call(gg_density_core, args = args)
+
+  }else{
+    p <- do.call(gg_density_core, args = args)
+    x.breaks <- .pretty_xbreaks(p, x.breaks, facet = facet)
+    y.breaks <- .pretty_ybreaks(p, y.breaks, zero = TRUE, facet = facet)
+
+    plotlist <- by.data.frame(data, INDICES = data[[facet]], FUN = function(d){
+      args$data <- d
+      args$x.breaks <- x.breaks
+      args$y.breaks <- y.breaks
+      do.call(gg_density_core, args = args)
+    })
+    gg_arrange(plotlist = plotlist, ...)
+  }
+
+}
+
+gg_density_core <- function(data,
+                       x,
+                       y = "density",
+                       group = NULL,
+                       x.breaks = NULL,
+                       y.breaks = NULL,
+                       x.title = waiver(),
+                       y.title = waiver(),
+                       legend.title = waiver(),
+                       legend.label = waiver(),
+                       legend.position = waiver(),
+                       add = c("mean", "median", "none"),
                        palate = NULL,
                        theme = theme_sci(), ...){
 
@@ -21,15 +72,18 @@ gg_density <- function(data,
   }
 
   # Factorization of group variable.
-  data[[group]] <- factor(data[[group]])
+  if(length(legend.label) == 0L){
+    data[[group]] <- factor(data[[group]])
+  }else{
+    data[[group]] <- factor(data[[group]], labels = legend.label)
+  }
 
   # Create density plot
-  p <- ggplot(data) +
-    geom_density(aes(x = .data[[x]], color = .data[[group]], fill = .data[[group]]), alpha = 0.5)
+  p <- suppressWarnings( ggplot(data, aes(x = .data[[x]], color = .data[[group]], fill = .data[[group]]), size = 0.25) +
+                           geom_density(alpha = 0.5, ...))
 
-  if(add.mean.line){
-    p <- add_line(data, x, group, plot = p)
-  }
+  add <- match.arg(add)
+  p <- .add_line(data = data, x = x, group = group, plot = p, type = add)
 
   # Set the X and Y axes
   x.breaks <- .pretty_xbreaks(p, x.breaks)
@@ -66,6 +120,13 @@ gg_density <- function(data,
   # Set legend position.
   p <- .set_legend_position(plot = p, position = legend.position)
 
+  # Set axis labels
+  if(.is_waiver(y.title)){
+    y.title <- "Density"
+  }
+
+  p <- .set_axis_title(p, x.title, y.title, data = data, x = x, y = y)
+
   # Delete legend if the group levels equal to one.
   if(length(unique(data[[group]])) == 1L){
     p <- p + legend_position("none")
@@ -75,17 +136,17 @@ gg_density <- function(data,
 }
 
 
-add_line <- function(data, x, group, plot){
-  means <- tapply(data[[x]], INDEX = data[[group]], FUN = mean, na.rm = TRUE)
-  means <- data.frame(group = names(means), linetype = "mean", value = means)
+.add_line <- function(data, x, group, plot, type = "mean"){
+  if(type != "none"){
+    stats <- tapply(data[[x]], INDEX = data[[group]], FUN = function(x){
+      do.call(type, args = list( x = x, na.rm = TRUE))
+    })
+    stats <- data.frame(group = names(stats), value = stats)
 
-  medians <- tapply(data[[x]], INDEX = data[[group]], FUN = median, na.rm = TRUE)
-  medians <- data.frame(group = names(medians), linetype = "median", value = medians)
-
-  stats <- rbind(means, medians)
-
-  plot +
-    geom_vline(aes(xintercept = .data[["value"]], color = .data[["group"]], linetype = .data[["linetype"]]), data = stats)
+    plot <- plot +
+      geom_vline(aes(xintercept = .data[["value"]], color = .data[["group"]]), data = stats, linetype = "dashed", size = 0.25)
+  }
+  plot
 }
 
 
