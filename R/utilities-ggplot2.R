@@ -201,22 +201,3 @@ rotate_y_text <- function (angle = 45, hjust = NULL, vjust = NULL, ...) {
     plot + legend_position(position)
   }
 }
-
-
-.set_axis_title <- function(plot, x.title, y.title, data, x, y){
-  if(.is_waiver(x.title)){
-    if(!is.null(attr(data[[x]], "label"))){
-      plot <- plot + ggplot2::xlab(attr(data[[x]]), "label")
-    }
-  }else{
-    plot <- plot + ggplot2::xlab(x.title)
-  }
-
-  if(.is_waiver(y.title)){
-    if(!is.null(attr(data[[y]], "label"))){
-      plot <- plot + ggplot2::ylab(attr(data[[y]]), "label")
-    }
-  }else{
-    plot <- plot + ggplot2::ylab(y.title)
-  }
-}

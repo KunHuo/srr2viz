@@ -7,7 +7,7 @@
 theme_sci(
   font.size = 12,
   font.family = "serif",
-  line.size = 0.5,
+  line.size = 0.25,
   legend.key.size = 0.8,
   face.bold = FALSE,
   panel.grid.major = FALSE,

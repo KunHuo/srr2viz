@@ -1,3 +1,29 @@
+#' Density plot
+#'
+#' @param data data
+#' @param x x
+#' @param y y
+#' @param group group
+#' @param facet facet
+#' @param x.breaks x breaks.
+#' @param y.breaks y breaks.
+#' @param legend.title legend title.
+#' @param legend.label legend labels
+#' @param legend.position legend position.
+#' @param add allowed values are one of "mean" or "median" (for adding mean or
+#' median line, respectively).
+#' @param palate 	the color palette to be used for coloring or filling by groups.
+#' Allowed values include "grey" for grey color palettes; brewer palettes e.g.
+#' "RdBu", "Blues", ...; or custom color palette e.g. c("blue", "red"); and
+#' scientific journal palettes from ggsci R package, e.g.: "npg", "aaas",
+#' "lancet", "jco", "ucscgb", "uchicago", "simpsons" and "rickandmorty".
+#' @param theme function, ggplot2 theme name. Default value is theme_sci().
+#' Allowed values include ggplot2 official themes: theme_gray(), theme_bw(),
+#' theme_minimal(), theme_classic(), theme_void(), ....
+#' @param ... other arguments to be passed to geom_density
+#'
+#' @return ggplot
+#' @export
 gg_density <- function(data,
                        x,
                        y = "density",
@@ -5,8 +31,6 @@ gg_density <- function(data,
                        facet = NULL,
                        x.breaks = NULL,
                        y.breaks = NULL,
-                       x.title = waiver(),
-                       y.title = waiver(),
                        legend.title = waiver(),
                        legend.label = waiver(),
                        legend.position = waiver(),
@@ -20,8 +44,6 @@ gg_density <- function(data,
                 group = group,
                 x.breaks = x.breaks,
                 y.breaks = y.breaks,
-                x.title = x.title,
-                y.title = y.title,
                 legend.title = legend.title,
                 legend.label = legend.label,
                 legend.position = legend.position,
@@ -44,7 +66,8 @@ gg_density <- function(data,
       args$y.breaks <- y.breaks
       do.call(gg_density_core, args = args)
     })
-    gg_arrange(plotlist = plotlist, ...)
+
+    patchwork::wrap_plots(plotlist) + patchwork::plot_annotation(tag_levels = "A")
   }
 
 }
@@ -55,8 +78,6 @@ gg_density_core <- function(data,
                        group = NULL,
                        x.breaks = NULL,
                        y.breaks = NULL,
-                       x.title = waiver(),
-                       y.title = waiver(),
                        legend.title = waiver(),
                        legend.label = waiver(),
                        legend.position = waiver(),
@@ -79,8 +100,8 @@ gg_density_core <- function(data,
   }
 
   # Create density plot
-  p <- suppressWarnings( ggplot(data, aes(x = .data[[x]], color = .data[[group]], fill = .data[[group]]), size = 0.25) +
-                           geom_density(alpha = 0.5, ...))
+  p <- suppressWarnings( ggplot(data, aes(x = .data[[x]], color = .data[[group]], fill = .data[[group]])) +
+                           geom_density(alpha = 0.5, size = 0.25, ...))
 
   add <- match.arg(add)
   p <- .add_line(data = data, x = x, group = group, plot = p, type = add)
@@ -120,12 +141,6 @@ gg_density_core <- function(data,
   # Set legend position.
   p <- .set_legend_position(plot = p, position = legend.position)
 
-  # Set axis labels
-  if(.is_waiver(y.title)){
-    y.title <- "Density"
-  }
-
-  p <- .set_axis_title(p, x.title, y.title, data = data, x = x, y = y)
 
   # Delete legend if the group levels equal to one.
   if(length(unique(data[[group]])) == 1L){
