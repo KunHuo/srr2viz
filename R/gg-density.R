@@ -1,12 +1,13 @@
 #' Density plot
 #'
 #' @param data data
-#' @param x x
-#' @param y y
-#' @param group group
-#' @param facet facet
+#' @param x x variable.
+#' @param y y variable.
+#' @param group group variable.
+#' @param facet facet variable.
 #' @param x.breaks x breaks.
 #' @param y.breaks y breaks.
+#' @param line.size line.size, default 0.25.
 #' @param legend.title legend title.
 #' @param legend.label legend labels
 #' @param legend.position legend position.
@@ -31,12 +32,13 @@ gg_density <- function(data,
                        facet = NULL,
                        x.breaks = NULL,
                        y.breaks = NULL,
+                       line.size = 0.25,
                        legend.title = waiver(),
                        legend.label = waiver(),
                        legend.position = waiver(),
                        add = c("mean", "median", "none"),
                        palate = NULL,
-                       theme = theme_sci(), ...){
+                       theme = theme_sci(line.size = line.size), ...){
 
   args <- list( data = data,
                 x = x,
@@ -44,6 +46,7 @@ gg_density <- function(data,
                 group = group,
                 x.breaks = x.breaks,
                 y.breaks = y.breaks,
+                line.size = line.size,
                 legend.title = legend.title,
                 legend.label = legend.label,
                 legend.position = legend.position,
@@ -78,12 +81,13 @@ gg_density_core <- function(data,
                        group = NULL,
                        x.breaks = NULL,
                        y.breaks = NULL,
+                       line.size = line.size,
                        legend.title = waiver(),
                        legend.label = waiver(),
                        legend.position = waiver(),
                        add = c("mean", "median", "none"),
                        palate = NULL,
-                       theme = theme_sci(), ...){
+                       theme = theme_sci(line.size = line.size), ...){
 
   # If group is NULL, the group column is added to data for the purpose of color
   # or fill mapping. Last, We will delete legend if the group levels equal to one.
@@ -101,10 +105,10 @@ gg_density_core <- function(data,
 
   # Create density plot
   p <- suppressWarnings( ggplot(data, aes(x = .data[[x]], color = .data[[group]], fill = .data[[group]])) +
-                           geom_density(alpha = 0.5, size = 0.25, ...))
+                           geom_density(alpha = 0.5, size = line.size, ...))
 
   add <- match.arg(add)
-  p <- .add_line(data = data, x = x, group = group, plot = p, type = add)
+  p <- .add_line(data = data, x = x, group = group, plot = p, type = add, line.size = line.size)
 
   # Set the X and Y axes
   x.breaks <- .pretty_xbreaks(p, x.breaks)
@@ -151,7 +155,7 @@ gg_density_core <- function(data,
 }
 
 
-.add_line <- function(data, x, group, plot, type = "mean"){
+.add_line <- function(data, x, group, plot, type = "mean", line.size = 0.25){
   if(type != "none"){
     stats <- tapply(data[[x]], INDEX = data[[group]], FUN = function(x){
       do.call(type, args = list( x = x, na.rm = TRUE))
@@ -159,7 +163,7 @@ gg_density_core <- function(data,
     stats <- data.frame(group = names(stats), value = stats)
 
     plot <- plot +
-      geom_vline(aes(xintercept = .data[["value"]], color = .data[["group"]]), data = stats, linetype = "dashed", size = 0.25)
+      geom_vline(aes(xintercept = .data[["value"]], color = .data[["group"]]), data = stats, linetype = "dashed", size = line.size)
   }
   plot
 }
